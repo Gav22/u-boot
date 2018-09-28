@@ -19,6 +19,9 @@
 			pinctrl-0 = <&rmii_pins>;
 			phy-mode = "rmii";
 			phy = <&phy1>;
+			snps,reset-gpio = <&pio 7 11 GPIO_ACTIVE_HIGH>;
+			snps,reset-active-low;
+			snps,reset-delays-us = <0 10000 1000000>;
 			status = "okay";
 
 			phy1: ethernet-phy@0 {
@@ -26,6 +29,31 @@
 			};
 		};
 	};
+	
+	leds {
+		compatible = "gpio-leds";
+		blue {
+			label = "wanderer:blue";
+			gpios = <&pio 7 9 GPIO_ACTIVE_HIGH>; /* PH9 */
+			default-state = "on";
+		};
+		wifi_wake {
+			label = "wifi:wake";
+			gpios = <&r_pio 0 3 GPIO_ACTIVE_HIGH>;
+			default-state = "on";
+		};
+		wifi_en {
+			label = "wifi:en";
+			gpios = <&r_pio 0 2 GPIO_ACTIVE_HIGH>;
+			default-state = "on";
+		};
+		wifi_rst {
+			label = "wifi:rst";
+			gpios = <&r_pio 0 4 GPIO_ACTIVE_HIGH>;
+			default-state = "on";
+		};
+	};
+	
 };
 
 &pio {

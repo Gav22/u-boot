@@ -15,6 +15,7 @@
  */
 struct led_uc_plat {
 	const char *label;
+	int default_on;
 };
 
 /**

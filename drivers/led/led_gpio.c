@@ -60,11 +60,19 @@ static int led_gpio_probe(struct udevice *dev)
 {
 	struct led_uc_plat *uc_plat = dev_get_uclass_platdata(dev);
 	struct led_gpio_priv *priv = dev_get_priv(dev);
+	int flags = GPIOD_IS_OUT;
+	int ret;
 
 	/* Ignore the top-level LED node */
 	if (!uc_plat->label)
 		return 0;
-	return gpio_request_by_name(dev, "gpios", 0, &priv->gpio, GPIOD_IS_OUT);
+
+	ret = gpio_request_by_name(dev, "gpios", 0, &priv->gpio, flags);
+	if (uc_plat->default_on) {
+		int r = gpio_led_set_state(dev, LEDST_ON);
+		printf("set on=%d\n", r);
+	}
+	return ret;
 }
 
 static int led_gpio_remove(struct udevice *dev)
@@ -92,8 +100,11 @@ static int led_gpio_bind(struct udevice *parent)
 	dev_for_each_subnode(node, parent) {
 		struct led_uc_plat *uc_plat;
 		const char *label;
+		const char *default_state;
 
 		label = ofnode_read_string(node, "label");
+		default_state = ofnode_read_string(node, "default-state");
+
 		if (!label) {
 			debug("%s: node %s has no label\n", __func__,
 			      ofnode_get_name(node));
@@ -106,6 +117,10 @@ static int led_gpio_bind(struct udevice *parent)
 			return ret;
 		uc_plat = dev_get_uclass_platdata(dev);
 		uc_plat->label = label;
+		uc_plat->default_on = 0;
+		if (default_state && strcmp("on", default_state) == 0) {
+			uc_plat->default_on = 1;
+		}
 	}
 
 	return 0;

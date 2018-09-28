@@ -226,6 +226,24 @@ int board_init(void)
 	gpio_direction_output(macpwr_pin, 1);
 #endif
 
+	{
+		unsigned int pl2, pl3, pl4, ph9;
+		gpio_lookup_name("PH9", NULL, NULL, &ph9);
+		gpio_lookup_name("PL2", NULL, NULL, &pl2);
+		gpio_lookup_name("PL3", NULL, NULL, &pl3);
+		gpio_lookup_name("PL4", NULL, NULL, &pl4);
+		gpio_request(ph9, "blue");
+		gpio_request(pl2, "wifi_en");
+		gpio_request(pl3, "wifi_wake"); // Enable PSU when low
+		gpio_request(pl4, "wifi_rst");
+		//gpio_direction_output(pl3, 0);
+		//mdelay(5);
+		gpio_direction_output(ph9, 1);
+		//gpio_direction_output(pl2, 1);
+		//mdelay(5);
+		//gpio_direction_output(pl4, 1);
+	}
+
 #ifdef CONFIG_DM_I2C
 	/*
 	 * Temporary workaround for enabling I2C clocks until proper sunxi DM
