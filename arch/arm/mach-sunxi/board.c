@@ -12,7 +12,6 @@
 
 #include <common.h>
 #include <mmc.h>
-#include <i2c.h>
 #include <serial.h>
 #include <spl.h>
 #include <asm/gpio.h>
@@ -24,6 +23,9 @@
 #include <asm/arch/timer.h>
 #include <asm/arch/tzpc.h>
 #include <asm/arch/mmc.h>
+#ifdef CONFIG_SPL_I2C_SUPPORT
+#include <i2c.h>
+#endif
 
 #include <linux/compiler.h>
 

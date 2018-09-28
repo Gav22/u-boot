@@ -56,7 +56,28 @@
 	
 };
 
+&i2c0 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&i2c0_pins>;
+	status = "okay";
+		eeprom: eeprom@57 {
+		compatible = "atmel,24c02";
+		reg = <0x57>;
+		pagesize = <8>;
+	};
+	usb2514b@2c {
+		compatible = "microchip,usb2514b";
+		reg = <0x2c>;
+		reset-gpios = <&pio 7 10 GPIO_ACTIVE_LOW>;
+	};
+};
+
+
 &pio {
+	i2c0_pins: i2c1_pins {
+		pins = "PH0", "PH1";
+		function = "i2c0";
+	};
 	rmii_pins: rmii_pins {
 		allwinner,pins = "PD10", "PD11", "PD13", "PD14",
 				 "PD17", "PD18", "PD19", "PD20",
