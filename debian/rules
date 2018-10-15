@@ -17,7 +17,7 @@ export DEB_LDFLAGS_MAINT_SET=
 ATF_BIN=/usr/share/arm-trusted-firmware/bl31.bin
 UBOOT_BIN=u-boot-wanderer.spl
 
-$(UBOOT_BIN): $(ATF_BIN)
+$(UBOOT_BIN):
 	export BL31=$(ATF_BIN) && \
 	export CROSS_COMPILE=$(DEB_HOST_GNU_TYPE)- && \
 	cp debian/conf/uboot.config .config && \
@@ -26,6 +26,8 @@ $(UBOOT_BIN): $(ATF_BIN)
 	cat spl/sunxi-spl.bin u-boot.itb > $@
 
 override_dh_auto_build: $(UBOOT_BIN)
+
+override_dh_auto_test:
 
 %:
 	dh $@ 
