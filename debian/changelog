@@ -1,3 +1,9 @@
+u-boot-wanderer (1.1) xenial; urgency=medium
+
+  * Add wanderer-1 to version string
+
+ -- Michael Walton <mwalton@fsn-mike.intranet.farsouthnet.com>  Tue, 16 Oct 2018 14:41:30 +1300
+
 u-boot-wanderer (1.0) xenial; urgency=medium
 
   * Initial release
