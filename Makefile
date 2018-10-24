@@ -3,7 +3,7 @@
 VERSION = 2018
 PATCHLEVEL = 11
 SUBLEVEL =
-EXTRAVERSION = -rc1
+EXTRAVERSION = -rc2
 NAME =
 
 # *DOCUMENTATION*
@@ -1074,7 +1074,10 @@ U_BOOT_ITS = $(subst ",,$(CONFIG_SPL_FIT_SOURCE))
 else
 ifneq ($(CONFIG_SPL_FIT_GENERATOR),"")
 U_BOOT_ITS := u-boot.its
-$(U_BOOT_ITS): FORCE
+ifeq ($(CONFIG_SPL_FIT_GENERATOR),"arch/arm/mach-rockchip/make_fit_atf.py")
+U_BOOT_ITS_DEPS += u-boot
+endif
+$(U_BOOT_ITS): $(U_BOOT_ITS_DEPS) FORCE
 	$(srctree)/$(CONFIG_SPL_FIT_GENERATOR) \
 	$(patsubst %,arch/$(ARCH)/dts/%.dtb,$(subst ",,$(CONFIG_OF_LIST))) > $@
 endif
@@ -1136,6 +1139,7 @@ OBJCOPYFLAGS_u-boot-with-spl.bin = -I binary -O binary \
 u-boot-with-spl.bin: spl/u-boot-spl.bin $(SPL_PAYLOAD) FORCE
 	$(call if_changed,pad_cat)
 
+ifeq ($(CONFIG_ARCH_LPC32XX)$(CONFIG_SPL),yy)
 MKIMAGEFLAGS_lpc32xx-spl.img = -T lpc32xximage -a $(CONFIG_SPL_TEXT_BASE)
 
 lpc32xx-spl.img: spl/u-boot-spl.bin FORCE
@@ -1155,6 +1159,7 @@ lpc32xx-full.bin: lpc32xx-boot-0.bin lpc32xx-boot-1.bin u-boot.img FORCE
 	$(call if_changed,cat)
 
 CLEAN_FILES += lpc32xx-*
+endif
 
 OBJCOPYFLAGS_u-boot-with-tpl.bin = -I binary -O binary \
 				   --pad-to=$(CONFIG_TPL_PAD_TO)
@@ -1521,7 +1526,7 @@ $(defaultenv_h): $(CONFIG_DEFAULT_ENV_FILE:"%"=%) FORCE
 # ---------------------------------------------------------------------------
 quiet_cmd_cpp_lds = LDS     $@
 cmd_cpp_lds = $(CPP) -Wp,-MD,$(depfile) $(cpp_flags) $(LDPPFLAGS) \
-		-D__ASSEMBLY__ -x assembler-with-cpp -P -o $@ $<
+		-D__ASSEMBLY__ -x assembler-with-cpp -std=c99 -P -o $@ $<
 
 u-boot.lds: $(LDSCRIPT) prepare FORCE
 	$(call if_changed_dep,cpp_lds)
@@ -1695,6 +1700,10 @@ help:
 	@echo  'Configuration targets:'
 	@$(MAKE) -f $(srctree)/scripts/kconfig/Makefile help
 	@echo  ''
+	@echo  'Test targets:'
+	@echo  ''
+	@echo  '  check           - Run all automated tests that use sandbox'
+	@echo  ''
 	@echo  'Other generic targets:'
 	@echo  '  all		  - Build all necessary images depending on configuration'
 	@echo  '  tests		  - Build U-Boot for sandbox and run tests'
@@ -1733,7 +1742,7 @@ help:
 	@echo  'Execute "make" or "make all" to build all targets marked with [*] '
 	@echo  'For further info see the ./README file'
 
-tests:
+tests check:
 	$(srctree)/test/run
 
 # Documentation targets

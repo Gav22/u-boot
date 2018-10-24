@@ -23,8 +23,6 @@
 * DM support in SPL
 */
 #ifdef CONFIG_SPL_BUILD
-#undef CONFIG_DM_SPI
-#undef CONFIG_DM_SPI_FLASH
 #undef CONFIG_DM_I2C
 #undef CONFIG_DM_I2C_COMPAT
 #endif
@@ -118,7 +116,6 @@
 
 #if !CONFIG_IS_ENABLED(DM_SERIAL)
 #define CONFIG_SYS_NS16550_SERIAL
-#define CONFIG_SYS_NS16550_REG_SIZE	-4	/* NS16550 register size */
 #define CONFIG_SYS_NS16550_COM1	DAVINCI_UART2_BASE /* Base address of UART2 */
 #endif
 #define CONFIG_SYS_NS16550_CLK	clk_get(DAVINCI_UART2_CLKID)
@@ -198,9 +195,6 @@
 #endif
 
 #ifdef CONFIG_USE_NOR
-#define CONFIG_FLASH_CFI_DRIVER
-#define CONFIG_SYS_FLASH_CFI
-#define CONFIG_SYS_FLASH_PROTECTION
 #define CONFIG_SYS_MAX_FLASH_BANKS	1 /* max number of flash banks */
 #define CONFIG_SYS_FLASH_SECT_SZ	(128 << 10) /* 128KB */
 #define CONFIG_ENV_OFFSET		(CONFIG_SYS_FLASH_SECT_SZ * 3)

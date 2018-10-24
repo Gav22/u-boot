@@ -58,7 +58,8 @@ dtb-$(CONFIG_ARCH_MESON) += \
 	meson-gxbb-nanopi-k2.dtb \
 	meson-gxl-s905x-p212.dtb \
 	meson-gxl-s905x-libretech-cc.dtb \
-	meson-gxl-s905x-khadas-vim.dtb
+	meson-gxl-s905x-khadas-vim.dtb \
+	meson-gxm-khadas-vim2.dtb
 dtb-$(CONFIG_TEGRA) += tegra20-harmony.dtb \
 	tegra20-medcom-wide.dtb \
 	tegra20-paz00.dtb \
@@ -134,6 +135,7 @@ dtb-$(CONFIG_ARCH_ZYNQ) += \
 	zynq-cse-nand.dtb \
 	zynq-cse-nor.dtb \
 	zynq-cse-qspi-single.dtb \
+	zynq-dlc20-rev1.0.dtb \
 	zynq-microzed.dtb \
 	zynq-minized.dtb \
 	zynq-picozed.dtb \
@@ -453,14 +455,14 @@ dtb-$(CONFIG_MX7) += imx7-colibri.dtb \
 dtb-$(CONFIG_ARCH_MX7ULP) += imx7ulp-evk.dtb
 
 dtb-$(CONFIG_RCAR_GEN3) += \
-	r8a7795-h3ulcb.dtb \
-	r8a7795-salvator-x.dtb \
-	r8a7796-m3ulcb.dtb \
-	r8a7796-salvator-x.dtb \
-	r8a77965-salvator-x.dtb \
-	r8a77970-eagle.dtb \
-	r8a77990-ebisu.dtb \
-	r8a77995-draak.dtb
+	r8a7795-h3ulcb-u-boot.dtb \
+	r8a7795-salvator-x-u-boot.dtb \
+	r8a7796-m3ulcb-u-boot.dtb \
+	r8a7796-salvator-x-u-boot.dtb \
+	r8a77965-salvator-x-u-boot.dtb \
+	r8a77970-eagle-u-boot.dtb \
+	r8a77990-ebisu-u-boot.dtb \
+	r8a77995-draak-u-boot.dtb
 
 dtb-$(CONFIG_SOC_KEYSTONE) += keystone-k2hk-evm.dtb \
 	keystone-k2l-evm.dtb \

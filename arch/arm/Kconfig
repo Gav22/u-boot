@@ -443,16 +443,6 @@ config ARCH_MVEBU
 	select SPI
 	imply CMD_DM
 
-config TARGET_DEVKIT3250
-	bool "Support devkit3250"
-	select CPU_ARM926EJS
-	select SUPPORT_SPL
-
-config TARGET_WORK_92105
-	bool "Support work_92105"
-	select CPU_ARM926EJS
-	select SUPPORT_SPL
-
 config TARGET_APF27
 	bool "Support apf27"
 	select CPU_ARM926EJS
@@ -668,6 +658,16 @@ config ARCH_MESON
 	  targeted at media players and tablet computers. We currently
 	  support the S905 (GXBaby) 64-bit SoC.
 
+config ARCH_LPC32XX
+	bool "NXP LPC32xx platform"
+	select CPU_ARM926EJS
+	select DM
+	select DM_GPIO
+	select DM_SERIAL
+	select SPL_DM if SPL
+	select SUPPORT_SPL
+	imply CMD_DM
+
 config ARCH_MX8M
 	bool "NXP i.MX8M platform"
 	select ARM64
@@ -853,6 +853,14 @@ config ARCH_SUNXI
 	imply SPL_SERIAL_SUPPORT
 	imply USB_GADGET
 
+config ARCH_VERSAL
+	bool "Support Xilinx Versal Platform"
+	select ARM64
+	select CLK
+	select DM
+	select DM_SERIAL
+	select OF_CONTROL
+
 config ARCH_VF610
 	bool "Freescale Vybrid"
 	select CPU_V7A
@@ -911,6 +919,7 @@ config ARCH_ZYNQMP
 	imply BOARD_LATE_INIT
 	imply CMD_DM
 	imply FAT_WRITE
+	imply MP
 
 config TEGRA
 	bool "NVIDIA Tegra"
@@ -1391,6 +1400,8 @@ source "arch/arm/mach-keystone/Kconfig"
 
 source "arch/arm/mach-kirkwood/Kconfig"
 
+source "arch/arm/cpu/arm926ejs/lpc32xx/Kconfig"
+
 source "arch/arm/mach-mvebu/Kconfig"
 
 source "arch/arm/cpu/armv7/ls102xa/Kconfig"
@@ -1448,6 +1459,8 @@ source "arch/arm/mach-uniphier/Kconfig"
 source "arch/arm/cpu/armv7/vf610/Kconfig"
 
 source "arch/arm/mach-zynq/Kconfig"
+
+source "arch/arm/mach-versal/Kconfig"
 
 source "arch/arm/mach-zynqmp-r5/Kconfig"
 
@@ -1507,11 +1520,9 @@ source "board/st/stv0991/Kconfig"
 source "board/tcl/sl50/Kconfig"
 source "board/ucRobotics/bubblegum_96/Kconfig"
 source "board/birdland/bav335x/Kconfig"
-source "board/timll/devkit3250/Kconfig"
 source "board/toradex/colibri_pxa270/Kconfig"
 source "board/vscom/baltos/Kconfig"
 source "board/woodburn/Kconfig"
-source "board/work-microwave/work_92105/Kconfig"
 source "board/xilinx/Kconfig"
 source "board/xilinx/zynq/Kconfig"
 source "board/xilinx/zynqmp/Kconfig"
