@@ -1,6 +1,7 @@
 u-boot-wanderer (1.2) xenial; urgency=medium
 
   * Merge upstream 2018-11
+  * Bump
 
  -- Michael Walton <mwalton@fsn-mike.intranet.farsouthnet.com>  Wed, 24 Oct 2018 14:47:42 +1300
 

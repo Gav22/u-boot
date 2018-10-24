@@ -2,7 +2,7 @@ Source: u-boot-wanderer
 Section: misc
 Priority: extra
 Maintainer: Michael Walton <mike@farsouthnet.com>
-Build-Depends: debhelper (>= 9), arm-trusted-firmware (>= 1.0), device-tree-compiler
+Build-Depends: debhelper (>= 9), arm-trusted-firmware (>= 1.0), device-tree-compiler, bison, flex, python:native, python-dev:native, swig
 Standards-Version: 3.9.4
 
 Package: u-boot-wanderer

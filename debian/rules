@@ -21,7 +21,7 @@ $(UBOOT_BIN):
 	export BL31=$(ATF_BIN) && \
 	export CROSS_COMPILE=$(DEB_HOST_GNU_TYPE)- && \
 	cp debian/conf/uboot.config .config && \
-	$(MAKE) clean && $(MAKE) oldconfig && \
+	$(MAKE) oldconfig && \
 	$(MAKE) -j4 && \
 	cat spl/sunxi-spl.bin u-boot.itb > $@
 

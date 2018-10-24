@@ -1,5 +1,8 @@
 /*
- * Copyright (c) 2016 ARM Ltd.
+ * Copyright (c) 2017 Icenowy Zheng <icenowy@aosc.xyz>
+ *
+ * Based on sun50i-a64-pine64.dts, which is:
+ *   Copyright (c) 2016 ARM Ltd.
  *
  * This file is dual-licensed: you can use it either under the terms
  * of the GPL or the X11 license, at your option. Note that this dual
@@ -40,11 +43,151 @@
  *     OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "sun50i-a64-pine64.dts"
+/dts-v1/;
+
+#include "sun50i-a64-sopine.dtsi"
+#include <dt-bindings/gpio/gpio.h>
 
 / {
 	model = "FSN Wanderer 2";
-	compatible = "pine64,pine64-plus", "allwinner,sun50i-a64";
+	compatible = "pine64,sopine-baseboard", "pine64,sopine",
+		     "allwinner,sun50i-a64";
 
-	/* TODO: Camera, Ethernet PHY, touchscreen, etc. */
+	aliases {
+		ethernet0 = &emac;
+		serial0 = &uart0;
+	};
+
+	chosen {
+		stdout-path = "serial0:115200n8";
+	};
+
+	reg_vcc1v8: vcc1v8 {
+		compatible = "regulator-fixed";
+		regulator-name = "vcc1v8";
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1800000>;
+	};
+	
+	leds {
+		compatible = "gpio-leds";
+		blue {
+			label = "wanderer:blue";
+			gpios = <&pio 7 9 GPIO_ACTIVE_HIGH>; /* PH9 */
+			default-state = "on";
+		};
+		wifi_wake {
+			label = "wifi:wake";
+			gpios = <&r_pio 0 3 GPIO_ACTIVE_HIGH>;
+			default-state = "on";
+		};
+		wifi_en {
+			label = "wifi:en";
+			gpios = <&r_pio 0 2 GPIO_ACTIVE_HIGH>;
+			default-state = "on";
+		};
+		wifi_rst {
+			label = "wifi:rst";
+			gpios = <&r_pio 0 4 GPIO_ACTIVE_HIGH>;
+			default-state = "on";
+		};
+	};
+	
+};
+
+&ehci0 {
+	status = "okay";
+};
+
+&ehci1 {
+	status = "okay";
+};
+
+&emac {
+	pinctrl-names = "default";
+	pinctrl-0 = <&rmii_pins>;
+	phy-mode = "rmii";
+	phy-handle = <&ext_rmii_phy>;
+	phy-supply = <&reg_dc1sw>;
+	status = "okay";
+};
+
+&mdio {
+	ext_rmii_phy: ethernet-phy@0 {
+		compatible = "ethernet-phy-ieee802.3-c22";
+		reg = <0>;
+	};
+};
+
+&i2c0 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&i2c0_pins>;
+	status = "okay";
+		eeprom: eeprom@57 {
+		compatible = "atmel,24c02";
+		reg = <0x57>;
+		pagesize = <8>;
+	};
+	usb2514b@2c {
+		compatible = "microchip,usb2514b";
+		reg = <0x2c>;
+		reset-gpios = <&pio 7 10 GPIO_ACTIVE_LOW>;
+	};
+};
+
+
+&mmc2 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&mmc2_pins>;
+	vmmc-supply = <&reg_dcdc1>;
+	vqmmc-supply = <&reg_vcc1v8>;
+	bus-width = <4>;
+	non-removable;
+	cap-mmc-hw-reset;
+	status = "okay";
+};
+
+&ohci0 {
+	status = "okay";
+};
+
+&ohci1 {
+	status = "okay";
+};
+
+&reg_dc1sw {
+	regulator-name = "vcc-phy";
+};
+
+&reg_dldo1 {
+	regulator-min-microvolt = <3300000>;
+	regulator-max-microvolt = <3300000>;
+	regulator-name = "vcc-hdmi";
+};
+
+&reg_dldo2 {
+	regulator-min-microvolt = <3300000>;
+	regulator-max-microvolt = <3300000>;
+	regulator-name = "vcc-mipi";
+};
+
+&reg_dldo4 {
+	regulator-min-microvolt = <3300000>;
+	regulator-max-microvolt = <3300000>;
+	regulator-name = "vcc-wifi";
+};
+
+&uart0 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&uart0_pins_a>;
+	status = "okay";
+};
+
+&usb_otg {
+	dr_mode = "host";
+	status = "okay";
+};
+
+&usbphy {
+	status = "okay";
 };
