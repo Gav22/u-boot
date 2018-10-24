@@ -202,6 +202,11 @@ config SUN4I_SPI
 	help
 	  SPI driver for Allwinner sun4i, sun5i and sun7i SoCs
 
+config SUN6I_SPI
+	bool "Allwinner A31/A64 SoCs SPI controller"
+	help
+	  SPI driver for Allwinner A31/A64 SoCs
+	  
 config TEGRA114_SPI
 	bool "nVidia Tegra114 SPI driver"
 	help
