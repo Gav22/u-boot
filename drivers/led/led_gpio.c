@@ -1,8 +1,7 @@
+// SPDX-License-Identifier: GPL-2.0+
 /*
  * Copyright (c) 2015 Google, Inc
  * Written by Simon Glass <sjg@chromium.org>
- *
- * SPDX-License-Identifier:	GPL-2.0+
  */
 
 #include <common.h>
@@ -11,8 +10,6 @@
 #include <led.h>
 #include <asm/gpio.h>
 #include <dm/lists.h>
-
-DECLARE_GLOBAL_DATA_PTR;
 
 struct led_gpio_priv {
 	struct gpio_desc gpio;
@@ -73,6 +70,11 @@ static int led_gpio_probe(struct udevice *dev)
 		printf("set on=%d\n", r);
 	}
 	return ret;
+	ret = gpio_request_by_name(dev, "gpios", 0, &priv->gpio, GPIOD_IS_OUT);
+	if (ret)
+		return ret;
+
+	return 0;
 }
 
 static int led_gpio_remove(struct udevice *dev)

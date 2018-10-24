@@ -346,6 +346,7 @@ dtb-$(CONFIG_MACH_SUN50I) += \
 	sun50i-a64-orangepi-win.dtb \
 	sun50i-a64-pine64-plus.dtb \
 	sun50i-a64-pine64.dtb \
+	sun50i-a64-sopine-baseboard.dtb \
 	sun50i-a64-pine64-wanderer.dtb
 dtb-$(CONFIG_MACH_SUN9I) += \
 	sun9i-a80-optimus.dtb \

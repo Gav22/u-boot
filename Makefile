@@ -2,7 +2,7 @@
 # SPDX-License-Identifier:	GPL-2.0+
 #
 
-VERSION = 2017
+VERSION = 2018
 PATCHLEVEL = 11
 SUBLEVEL = wanderer-1
 EXTRAVERSION =
