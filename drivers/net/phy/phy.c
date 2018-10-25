@@ -528,6 +528,9 @@ int phy_init(void)
 #ifdef CONFIG_PHY_FIXED
 	phy_fixed_init();
 #endif
+#ifdef CONFIG_PHY_KSZ8794_SPI
+	phy_ksz8794_spi_init();
+#endif
 	return 0;
 }
 
