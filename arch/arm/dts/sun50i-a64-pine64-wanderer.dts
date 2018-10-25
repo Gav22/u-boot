@@ -107,8 +107,8 @@
 
 &emac {
 	pinctrl-names = "default";
-	pinctrl-0 = <&rmii_pins>;
-	phy-mode = "rmii";
+	pinctrl-0 = <&rgmii_pins>;
+	phy-mode = "rgmii";
 	phy-handle = <&ext_rmii_phy>;
 	phy-supply = <&reg_dc1sw>;
 	status = "okay";

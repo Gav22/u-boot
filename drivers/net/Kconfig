@@ -310,11 +310,10 @@ config SUN8I_EMAC
         bool "Allwinner Sun8i Ethernet MAC support"
         depends on DM_ETH
         select PHYLIB
-	select PHY_GIGE
         help
           This driver supports the  Allwinner based SUN8I/SUN50I Ethernet MAC.
-	  It can be found in H3/A64/A83T based SoCs and compatible with both
-	  External and Internal PHYs.
+	      It can be found in H3/A64/A83T based SoCs and compatible with both
+	      External and Internal PHYs.
 
 config SH_ETHER
 	bool "Renesas SH Ethernet MAC"

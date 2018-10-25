@@ -27,8 +27,14 @@
 #define KSZ8794_REG_GC8		0x0a    /* Global Control 8 */
 #define KSZ8794_REG_GC9		0x0b    /* Global Control 9 */
 
-#define KSZ8794_REG_PC(p, r)	((0x10 * p) + r)	 /* Port Control */
+#define KSZ8794_REG_PC(p, r)	((0x10 * p) + r)	 /* Port Control, p = 1,2,3,5 */
 #define KSZ8794_REG_PS(p, r)	((0x10 * p) + r + 0xe)  /* Port Status */
+
+#define KSZ8794_REG_STATUS0(p)  	(KSZ8794_REG_PC(p, 0x08))
+#define KSZ8794_REG_STATUS2(p)  	(KSZ8794_REG_PC(p, 0x0e))
+#define KSZ8794_REG_CONTROL9(p) 	(KSZ8794_REG_PC(p, 0x0c))
+#define KSZ8794_REG_CONTROL10(p) 	(KSZ8794_REG_PC(p, 0x0d))
+#define KSZ8794_REG_CONTROL11(p) 	(KSZ8794_REG_PC(p, 0x0f))
 
 #define KSZ8794_REG_TPC0		0x60    /* TOS Priority Control 0 */
 #define KSZ8794_REG_TPC1		0x61    /* TOS Priority Control 1 */
@@ -147,7 +153,9 @@ static int ksz8794_write(struct ksz8794_dev *priv, u8 *buf,
 
 static inline int ksz8794_read_reg(struct ksz8794_dev *priv, u8 addr, u8 *buf)
 {
-	return ksz8794_read(priv, buf, addr, 1);
+	int ret = ksz8794_read(priv, buf, addr, 1);
+	//printf("ksz8794_read_reg: addr=0x%02x res=0x%02x\n", addr, *buf);
+	return ret;
 }
 
 static inline int ksz8794_write_reg(struct ksz8794_dev *priv, u8 addr, u8 val)
@@ -159,18 +167,96 @@ static inline int ksz8794_write_reg(struct ksz8794_dev *priv, u8 addr, u8 val)
 
 static int ksz8794_mdio_read(struct mii_dev *bus, int addr, int devad, int reg)
 {
+	struct ksz8794_dev *priv = bus->priv;
+	int p = addr;
+	u8 s0, s1, s2;
+	int r = 0;
+
 	printf("ksz8794_mdio_read: addr=%d devad=%d reg=%d\n", addr, devad, reg);
+	/* phyaddr is 1 - 3 */
+	if (p < 1 || p > 3) {
+		return 0xffff;
+	}
+	/* Simulate MIIM of this device */
 	if (reg == MII_PHYSID1) return 0x0022;
 	if (reg == MII_PHYSID2) return 0x1550;
+	if (reg == MII_BMCR) {
+		ksz8794_read_reg(priv, KSZ8794_REG_CONTROL9(p), &s0);
+		ksz8794_read_reg(priv, KSZ8794_REG_CONTROL10(p), &s1);
+		ksz8794_read_reg(priv, KSZ8794_REG_CONTROL11(p), &s2);
+		if (s0 & 0x80) r |= BMCR_ANENABLE;
+		if (s0 & 0x40) r |= BMCR_SPEED100;
+		if (s0 & 0x20) r |= BMCR_FULLDPLX;
+		if (s1 & 0x80) r |= 0x0001; // led off
+		if (s1 & 0x40) r |= 0x0002; // disable tx
+		if (s1 & 0x20) r |= BMCR_ANRESTART;
+		if (s1 & 0x08) r |= BMCR_PDOWN;
+		if (s1 & 0x04) r |= 0x0008; // disable MDI/MDIX
+		if (s1 & 0x02) r |= 0x0010; // force MDI
+		if (s1 & 0x01) r |= BMCR_LOOPBACK;
+		if (s2 & 0x20) r |= BMCR_ISOLATE;
+		if (s2 & 0x10) r |= BMCR_RESET;
+	} else if (reg == MII_BMSR) {
+		r = BMSR_100FULL | BMSR_100HALF | BMSR_10FULL | BMSR_10HALF | BMSR_ANEGCAPABLE;
+		ksz8794_read_reg(priv, KSZ8794_REG_STATUS2(p), &s0);
+		if (s0 & 0x40) r |= BMSR_ANEGCOMPLETE;
+		if (s0 & 0x20) r |= BMSR_LSTATUS;
+	} else if (reg == MII_ADVERTISE) {
+		/* Just hard code it */
+		r = ADVERTISE_PAUSE_CAP | ADVERTISE_100FULL | ADVERTISE_10FULL | ADVERTISE_100HALF | ADVERTISE_10HALF | ADVERTISE_CSMA;
+	} else if (reg == MII_LPA) {
+		ksz8794_read_reg(priv, KSZ8794_REG_STATUS0(p), &s0);
+		if (s0 & 0x01) r |= LPA_10HALF;
+		if (s0 & 0x02) r |= LPA_10FULL;
+		if (s0 & 0x04) r |= LPA_100HALF;
+		if (s0 & 0x08) r |= LPA_100FULL;
+		if (s0 & 0x20) r |= LPA_PAUSE_ASYM;
+	} else if (reg == 0x1f) { /* PHY special control/status */
+		/* TODO? */
+	} else {
+		return 0xffff;
+	}
 
-	return 0;
+	return r;
 
 }
 
-static int ksz8794_mdio_write(struct mii_dev *bus, int addr, int devad, int reg,
-			    u16 val)
+static int ksz8794_mdio_write(struct mii_dev *bus, int addr, int devad, int reg, u16 val)
 {
+	struct ksz8794_dev *priv = bus->priv;
+	int p = addr;
+	u8 s0, s1, s2;
+
 	printf("ksz8794_mdio_write: addr=%d devad=%d reg=%d val=0x%04X\n", addr, devad, reg, val);
+	/* phyaddr is 1 - 3 */
+	if (p < 1 || p > 3) {
+		return 0xffff;
+	}
+	/* Simulate MIIM of this device */
+	if (reg == MII_BMCR) {
+		ksz8794_read_reg(priv, KSZ8794_REG_CONTROL9(p), &s0);
+		ksz8794_read_reg(priv, KSZ8794_REG_CONTROL11(p), &s2);
+		s0 &= ~(0x80|0x40|0x20);
+		s1 = 0;
+		s2 &= ~(0x20|0x10);
+		if (val & BMCR_ANENABLE) s0 |= 0x80;
+		if (val & BMCR_SPEED100) s0 |= 0x40;
+		if (val & BMCR_FULLDPLX) s0 |= 0x20;
+		if (val & 0x0001) s1 |= 0x80;
+		if (val & 0x0002) s1 |= 0x40;
+		if (val & BMCR_ANRESTART) s1 |= 0x20;
+		if (val & BMCR_PDOWN) s1 |= 0x08;
+		if (val & 0x0008) s1 |= 0x04;
+		if (val & 0x0010) s1 |= 0x02;
+		if (val & BMCR_LOOPBACK) s1 |= 0x01;
+		if (val & BMCR_ISOLATE) s2 |= 0x20;
+		if (val & BMCR_RESET) s2 |= 0x10;
+
+		ksz8794_write_reg(priv, KSZ8794_REG_CONTROL9(p), s0);
+		ksz8794_write_reg(priv, KSZ8794_REG_CONTROL10(p), s1);
+		/* reset (if enabled) last */
+		ksz8794_write_reg(priv, KSZ8794_REG_CONTROL11(p), s2);
+	}
 	return 0;
 }
 
@@ -263,7 +349,7 @@ static int ksz8794_startup(struct phy_device *phydev)
 static struct phy_driver ksz8794_spi_driver = {
 	.name = "KSZ8794 Switch/PHY",
 	.uid = 0x221550,
-	.mask = 0xffffff,
+	.mask = 0xfffff0,
 	.features = PHY_BASIC_FEATURES,
 	.probe = &ksz8794_probe,
 	.config = &ksz8794_config,
