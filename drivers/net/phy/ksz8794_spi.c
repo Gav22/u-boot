@@ -172,7 +172,7 @@ static int ksz8794_mdio_read(struct mii_dev *bus, int addr, int devad, int reg)
 	u8 s0, s1, s2;
 	int r = 0;
 
-	printf("ksz8794_mdio_read: addr=%d devad=%d reg=%d\n", addr, devad, reg);
+	//printf("ksz8794_mdio_read: addr=%d devad=%d reg=%d\n", addr, devad, reg);
 	/* phyaddr is 1 - 3 */
 	if (p < 1 || p > 3) {
 		return 0xffff;
@@ -227,7 +227,7 @@ static int ksz8794_mdio_write(struct mii_dev *bus, int addr, int devad, int reg,
 	int p = addr;
 	u8 s0, s1, s2;
 
-	printf("ksz8794_mdio_write: addr=%d devad=%d reg=%d val=0x%04X\n", addr, devad, reg, val);
+	//printf("ksz8794_mdio_write: addr=%d devad=%d reg=%d val=0x%04X\n", addr, devad, reg, val);
 	/* phyaddr is 1 - 3 */
 	if (p < 1 || p > 3) {
 		return 0xffff;
@@ -304,7 +304,7 @@ static int ksz8794_mdio_init(const char *name, struct ksz8794_dev *priv)
 	ksz8794_read_reg(priv, KSZ8794_REG_ID0, &id0);
 	ksz8794_read_reg(priv, KSZ8794_REG_ID1, &id1);
 	if (id0 != FAMILY_KSZ8795 || (id1 >> 4) != KSZ8794_CHIP_ID) {
-		printf("ksz8975_spi: invalid chip id0=%02X id1=%02X\n", id0, id1);
+		//printf("ksz8975_spi: invalid chip id0=%02X id1=%02X\n", id0, id1);
 		mdio_free(bus);
 		return -ENODEV;
 	}
@@ -324,13 +324,13 @@ static int ksz8794_mdio_init(const char *name, struct ksz8794_dev *priv)
 
 static int ksz8794_probe(struct phy_device *phydev)
 {
-	printf("ksz8794_probe\n");
+	//printf("ksz8794_probe\n");
 	return 0;
 }
 
 static int ksz8794_config(struct phy_device *phydev)
 {
-	printf("ksz8794_config\n");
+	//printf("ksz8794_config\n");
 	phy_write(phydev, MDIO_DEVAD_NONE, MII_BMCR, BMCR_RESET);
 
 	genphy_config_aneg(phydev);
@@ -340,7 +340,7 @@ static int ksz8794_config(struct phy_device *phydev)
 
 static int ksz8794_startup(struct phy_device *phydev)
 {
-	printf("ksz8794_startup\n");
+	//printf("ksz8794_startup\n");
 	// TODO: fetch and parse status?
 	return 0;
 }
@@ -361,7 +361,7 @@ static struct phy_driver ksz8794_spi_driver = {
 int phy_ksz8794_spi_init(void)
 {
 	int ret = 0;
-	printf("ksz8794_init\n");
+	//printf("ksz8794_init\n");
 
 	ret = ksz8794_mdio_init("ksz8794_spi", &KSZ8794_DEV);
 
