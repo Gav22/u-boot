@@ -1,1 +1,4 @@
 u-boot-wanderer.spl usr/share/u-boot-wanderer/
+tools/env/fw_printenv usr/share/u-boot-wanderer/
+debian/conf/fw_env.config /etc/fw_env.config
+
