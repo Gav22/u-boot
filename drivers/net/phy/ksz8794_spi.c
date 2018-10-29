@@ -162,6 +162,7 @@ static inline int ksz8794_write_reg(struct ksz8794_dev *priv, u8 addr, u8 val)
 {
 	u8 buf = val;
 
+	//printf("ksz8794_write_reg: addr=%d val=%02X\n", addr, val);
 	return ksz8794_write(priv, &buf, addr, 1);
 }
 
@@ -184,7 +185,7 @@ static int ksz8794_mdio_read(struct mii_dev *bus, int addr, int devad, int reg)
 		ksz8794_read_reg(priv, KSZ8794_REG_CONTROL9(p), &s0);
 		ksz8794_read_reg(priv, KSZ8794_REG_CONTROL10(p), &s1);
 		ksz8794_read_reg(priv, KSZ8794_REG_CONTROL11(p), &s2);
-		if (s0 & 0x80) r |= BMCR_ANENABLE;
+		if (!(s0 & 0x80)) r |= BMCR_ANENABLE;
 		if (s0 & 0x40) r |= BMCR_SPEED100;
 		if (s0 & 0x20) r |= BMCR_FULLDPLX;
 		if (s1 & 0x80) r |= 0x0001; // led off
@@ -239,7 +240,7 @@ static int ksz8794_mdio_write(struct mii_dev *bus, int addr, int devad, int reg,
 		s0 &= ~(0x80|0x40|0x20);
 		s1 = 0;
 		s2 &= ~(0x20|0x10);
-		if (val & BMCR_ANENABLE) s0 |= 0x80;
+		if (!(val & BMCR_ANENABLE)) s0 |= 0x80; // this bit is opposite in polarity
 		if (val & BMCR_SPEED100) s0 |= 0x40;
 		if (val & BMCR_FULLDPLX) s0 |= 0x20;
 		if (val & 0x0001) s1 |= 0x80;
@@ -252,10 +253,12 @@ static int ksz8794_mdio_write(struct mii_dev *bus, int addr, int devad, int reg,
 		if (val & BMCR_ISOLATE) s2 |= 0x20;
 		if (val & BMCR_RESET) s2 |= 0x10;
 
+		/* reset (if enabled) first */
+		ksz8794_write_reg(priv, KSZ8794_REG_CONTROL11(p), s2);
+		// Hang on
+		udelay(KSZ8794_RESET_DELAY);
 		ksz8794_write_reg(priv, KSZ8794_REG_CONTROL9(p), s0);
 		ksz8794_write_reg(priv, KSZ8794_REG_CONTROL10(p), s1);
-		/* reset (if enabled) last */
-		ksz8794_write_reg(priv, KSZ8794_REG_CONTROL11(p), s2);
 	}
 	return 0;
 }

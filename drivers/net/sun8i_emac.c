@@ -786,28 +786,26 @@ static int sun8i_emac_eth_probe(struct udevice *dev)
 {
 	struct eth_pdata *pdata = dev_get_platdata(dev);
 	struct emac_eth_dev *priv = dev_get_priv(dev);
-	// MW: TODO: support auto switch ksz8794_spi (RGMII, SPI) and ksz8081 (RMII, MDIO)
-	int use_ksz = 1;
-	const char* phyname;
 
 	priv->mac_reg = (void *)pdata->iobase;
 
-	if (use_ksz) {
+	/* We support RGMII to KSZ8794 switch, and RMII to KSZ8081 PHY */
+	priv->bus = miiphy_get_dev_by_name("ksz8794_spi");
+
+	if (priv->bus) {
+		/* The KSZ8794 was detected, connect to it using RGMII */
 		priv->interface = PHY_INTERFACE_MODE_RGMII;
 		priv->phyaddr = 3; // main external port
-		phyname = "ksz8794_spi";
 	} else {
+		/* Use the RMII connection to single PHY instead */
+		sun8i_mdio_init(dev->name, dev);
+		priv->bus = miiphy_get_dev_by_name(dev->name);
 		priv->interface = PHY_INTERFACE_MODE_RMII;
 		priv->phyaddr = 0;
-		phyname = dev->name;
 	}
 
 	sun8i_emac_board_setup(priv);
 	sun8i_emac_set_syscon(priv);
-
-	sun8i_mdio_init(dev->name, dev);
-
-	priv->bus = miiphy_get_dev_by_name(phyname);
 
 	return sun8i_phy_init(priv, dev);
 }

@@ -246,8 +246,9 @@ int board_init(void)
 #endif
 
 	{
-		unsigned int pl2, pl3, pl4, ph9;
+		unsigned int pl2, pl3, pl4, ph9, ph11;
 		gpio_lookup_name("PH9", NULL, NULL, &ph9);
+		gpio_lookup_name("PH11", NULL, NULL, &ph11);
 		gpio_lookup_name("PL2", NULL, NULL, &pl2);
 		gpio_lookup_name("PL3", NULL, NULL, &pl3);
 		gpio_lookup_name("PL4", NULL, NULL, &pl4);
@@ -258,6 +259,11 @@ int board_init(void)
 		//gpio_direction_output(pl3, 0);
 		//mdelay(5);
 		gpio_direction_output(ph9, 1);
+		// Reset Ethernet PHY / Switch - see sun8i_emac.c, we do it here to support KSZ8794 init too
+		gpio_direction_output(ph11, 0);
+		mdelay(10);
+		gpio_direction_output(ph11, 1);
+		mdelay(10);
 		//gpio_direction_output(pl2, 1);
 		//mdelay(5);
 		//gpio_direction_output(pl4, 1);
