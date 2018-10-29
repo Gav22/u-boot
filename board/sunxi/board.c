@@ -246,12 +246,15 @@ int board_init(void)
 #endif
 
 	{
-		unsigned int pl2, pl3, pl4, ph9, ph11;
+		unsigned int pl2, pl3, pl4, ph9, ph11, ph6, ph5, ph10;
 		gpio_lookup_name("PH9", NULL, NULL, &ph9);
 		gpio_lookup_name("PH11", NULL, NULL, &ph11);
 		gpio_lookup_name("PL2", NULL, NULL, &pl2);
 		gpio_lookup_name("PL3", NULL, NULL, &pl3);
 		gpio_lookup_name("PL4", NULL, NULL, &pl4);
+		gpio_lookup_name("PH6", NULL, NULL, &ph6); // Uno, front USB power
+		gpio_lookup_name("PH5", NULL, NULL, &ph5); // Duo, USB1 power
+		gpio_lookup_name("PH10", NULL, NULL, &ph10); // ~USB_RESET
 		gpio_request(ph9, "blue");
 		gpio_request(pl2, "wifi_en");
 		gpio_request(pl3, "wifi_wake"); // Enable PSU when low
@@ -260,10 +263,15 @@ int board_init(void)
 		//mdelay(5);
 		gpio_direction_output(ph9, 1);
 		// Reset Ethernet PHY / Switch - see sun8i_emac.c, we do it here to support KSZ8794 init too
+		// Reset USB hub if present
+		gpio_direction_output(ph10, 0);
 		gpio_direction_output(ph11, 0);
 		mdelay(10);
+		gpio_direction_output(ph10, 1);
 		gpio_direction_output(ph11, 1);
 		mdelay(10);
+		gpio_direction_output(ph6, 1);
+		gpio_direction_output(ph5, 1); // power up USBs
 		//gpio_direction_output(pl2, 1);
 		//mdelay(5);
 		//gpio_direction_output(pl4, 1);
