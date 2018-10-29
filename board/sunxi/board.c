@@ -13,6 +13,8 @@
 #include <common.h>
 #include <dm.h>
 #include <mmc.h>
+#include <spi.h>
+#include <spi_flash.h>
 #include <axp_pmic.h>
 #include <generic-phy.h>
 #include <phy-sun4i-usb.h>
@@ -706,6 +708,109 @@ static void parse_spl_header(const uint32_t spl_addr)
 	env_set_hex("fel_scriptaddr", spl->fel_script_address);
 }
 
+#ifndef CONFIG_ENV_SPI_BUS
+# define CONFIG_ENV_SPI_BUS	CONFIG_SF_DEFAULT_BUS
+#endif
+#ifndef CONFIG_ENV_SPI_CS
+# define CONFIG_ENV_SPI_CS	CONFIG_SF_DEFAULT_CS
+#endif
+#ifndef CONFIG_ENV_SPI_MAX_HZ
+# define CONFIG_ENV_SPI_MAX_HZ	CONFIG_SF_DEFAULT_SPEED
+#endif
+#ifndef CONFIG_ENV_SPI_MODE
+# define CONFIG_ENV_SPI_MODE	CONFIG_SF_DEFAULT_MODE
+#endif
+
+#define CONFIG_ENV_ROM_OFFSET		0xde000
+#define CONFIG_ENV_ROM_SIZE			0x01000
+#define CONFIG_ENV_ROM_LEN			(CONFIG_ENV_ROM_SIZE - 4)
+
+/*
+ * Read manufacturing ROM data from SPI flash
+ */
+static int read_spi_rom(void) {
+	int	ret = 0;
+#ifdef CONFIG_DM_SPI_FLASH
+	struct udevice *new;
+	struct spi_flash *env_flash;
+	char *buf = NULL;
+
+	buf = (char *)memalign(ARCH_DMA_MINALIGN, CONFIG_ENV_ROM_SIZE);
+	if (!buf) {
+		return -EIO;
+	}
+	/* speed and mode will be read from DT */
+	ret = spi_flash_probe_bus_cs(CONFIG_ENV_SPI_BUS, CONFIG_ENV_SPI_CS,
+				     CONFIG_ENV_SPI_MAX_HZ, CONFIG_ENV_SPI_MODE,
+				     &new);
+	if (ret) {
+		printf("read_spi_rom: can't get SPI bus, ret=%d\n", ret);
+		goto out;
+	}
+
+	env_flash = dev_get_uclass_priv(new);
+
+	if (!env_flash) {
+		printf("read_spi_rom: can't get flash device\n");
+		ret = -EIO;
+		goto out;
+	}
+
+	ret = spi_flash_read(env_flash,
+		CONFIG_ENV_ROM_OFFSET, CONFIG_ENV_ROM_SIZE, buf);
+
+	spi_flash_free(env_flash);
+
+	if (ret == 0) {
+		uint32_t crc;
+		char *bptr = (char *) buf + 4;
+		/* We have the ROM with mac addresses and serial numbers */
+		/* Like env, first 4 bytes are crc */
+		memcpy(&crc, buf, sizeof(crc));
+
+		if (crc32(0, (void*)bptr, CONFIG_ENV_ROM_LEN) != crc) {
+			printf("Bad CRC in mfg ROM, need %08X\n", crc32(0, (void*)bptr, CONFIG_ENV_ROM_LEN));
+			ret = -EIO;
+			goto out;
+		}
+
+		/* Parse, same format as standard environment, forcibly setting environment variables */
+		while (*bptr != '\0' && (bptr-buf) < CONFIG_ENV_ROM_SIZE) {
+			char *name, *val;
+			/* name */
+			for (name = bptr; *bptr != '=' && *bptr && (bptr-buf) < CONFIG_ENV_ROM_SIZE; bptr++)
+				;
+			if (*name) {
+				/* ready set go */
+				hdelete_r(name, &env_htab, H_FORCE);
+			}
+			if (*bptr) { /* = */
+				/* terminate in place of = */
+				*bptr++ = '\0';
+				/* value */
+				for (val = bptr; *bptr && (bptr-buf) < CONFIG_ENV_ROM_SIZE; bptr++)
+					;
+				if (*val) {
+					ENTRY e, *ep;
+					e.key = name;
+					e.data = val;
+					hsearch_r(e, ENTER, &ep, &env_htab, H_FORCE);
+				}
+			}
+			bptr++;
+		}
+
+
+
+
+	}
+out:
+	free(buf);
+
+#endif /* CONFIG_DM_SPI_FLASH */
+	return ret;
+}
+
 /*
  * Note this function gets called multiple times.
  * It must not make any changes to env variables which already exist.
@@ -717,6 +822,8 @@ static void setup_environment(const void *fdt)
 	uint8_t mac_addr[6];
 	char ethaddr[16];
 	int i, ret;
+
+	read_spi_rom();
 
 	ret = sunxi_get_sid(sid);
 	if (ret == 0 && sid[0] != 0) {
