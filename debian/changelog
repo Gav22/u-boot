@@ -2,6 +2,7 @@ u-boot-wanderer (1.4) xenial; urgency=medium
 
   * I2C driver and I2C EEPROM driver
   * Load manufacturing data from EEPROM
+  * Updated config
 
  -- Michael Walton <mwalton@fsn-mike.intranet.farsouthnet.com>  Tue, 30 Oct 2018 15:50:54 +1300
 
