@@ -11,11 +11,13 @@
 #include <i2c.h>
 #include <linux/errno.h>
 #include <asm/io.h>
+#include <asm/gpio.h>
 #include <linux/bitops.h>
 #include <linux/compat.h>
 #ifdef CONFIG_DM_I2C
 #include <dm.h>
 #endif
+#include <asm/arch/clock.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -60,6 +62,8 @@ struct  mvtwsi_registers {
 	u32 soft_reset;
 	u32 debug; /* Dummy field for build compatibility with mvebu */
 };
+
+#define SUN50I_IOMUX				2
 
 #else
 
@@ -475,6 +479,22 @@ static uint __twsi_i2c_set_bus_speed(struct mvtwsi_registers *twsi,
 	return highest_speed;
 }
 
+#ifdef CONFIG_SUNXI_GEN_SUN6I
+static void sun6i_i2c_enable_clock(void)
+{
+	struct sunxi_ccm_reg *const ccm =
+		(struct sunxi_ccm_reg *const)SUNXI_CCM_BASE;
+
+	u32 bit = 0; // TWI 0 only!
+
+	/* Deassert I2C reset */
+	setbits_le32(&ccm->apb2_reset_cfg, (1 << bit));
+
+	/* Enable clock */
+	setbits_le32(&ccm->apb2_gate, (1 << bit));
+}
+#endif
+
 /*
  * __twsi_i2c_init() - Initialize the I2C controller.
  *
@@ -491,6 +511,10 @@ static void __twsi_i2c_init(struct mvtwsi_registers *twsi, int speed,
 			    int slaveadd, uint *actual_speed)
 {
 	uint tmp_speed;
+
+#ifdef CONFIG_SUNXI_GEN_SUN6I
+	sun6i_i2c_enable_clock();
+#endif
 
 	/* Reset controller */
 	twsi_reset(twsi);
@@ -791,7 +815,7 @@ static int mvtwsi_i2c_ofdata_to_platdata(struct udevice *bus)
 		return -ENOMEM;
 
 	dev->index = fdtdec_get_int(gd->fdt_blob, dev_of_offset(bus),
-				    "cell-index", -1);
+				    "cell-index", 0);
 	dev->slaveadd = fdtdec_get_int(gd->fdt_blob, dev_of_offset(bus),
 				       "u-boot,i2c-slave-addr", 0x0);
 	dev->speed = fdtdec_get_int(gd->fdt_blob, dev_of_offset(bus),
@@ -816,10 +840,93 @@ static int mvtwsi_i2c_bind(struct udevice *bus)
 	return 0;
 }
 
+#ifdef CONFIG_SUNXI_GEN_SUN6I
+static int mvtwsi_i2c_parse_pins(struct udevice *dev)
+{
+	const void *fdt = gd->fdt_blob;
+	const char *pin_name;
+	const fdt32_t *list;
+	u32 phandle;
+	int drive, pull = 0, pin, i;
+	int offset;
+	int size;
+
+	list = fdt_getprop(fdt, dev_of_offset(dev), "pinctrl-0", &size);
+	if (!list) {
+		printf("WARNING: mvtwsi: cannot find pinctrl-0 node\n");
+		return -EINVAL;
+	}
+
+	while (size) {
+		phandle = fdt32_to_cpu(*list++);
+		size -= sizeof(*list);
+
+		offset = fdt_node_offset_by_phandle(fdt, phandle);
+		if (offset < 0)
+			return offset;
+
+		drive = fdt_getprop_u32_default_node(fdt, offset, 0,
+						     "drive-strength", 0);
+		if (drive) {
+			if (drive <= 10)
+				drive = 0;
+			else if (drive <= 20)
+				drive = 1;
+			else if (drive <= 30)
+				drive = 2;
+			else
+				drive = 3;
+		} else {
+			drive = fdt_getprop_u32_default_node(fdt, offset, 0,
+							     "allwinner,drive",
+							      0);
+			drive = min(drive, 3);
+		}
+
+		if (fdt_get_property(fdt, offset, "bias-disable", NULL))
+			pull = 0;
+		else if (fdt_get_property(fdt, offset, "bias-pull-up", NULL))
+			pull = 1;
+		else if (fdt_get_property(fdt, offset, "bias-pull-down", NULL))
+			pull = 2;
+		else
+			pull = fdt_getprop_u32_default_node(fdt, offset, 0,
+							    "allwinner,pull",
+							     0);
+		pull = min(pull, 2);
+
+		for (i = 0; ; i++) {
+			pin_name = fdt_stringlist_get(fdt, offset,
+						      "pins", i, NULL);
+			if (!pin_name) {
+				pin_name = fdt_stringlist_get(fdt, offset,
+							      "allwinner,pins",
+							       i, NULL);
+				if (!pin_name)
+					break;
+			}
+
+			pin = name_to_gpio(pin_name);
+			if (pin < 0)
+				break;
+
+			sunxi_gpio_set_cfgpin(pin, SUN50I_IOMUX);
+			sunxi_gpio_set_drv(pin, drive);
+			sunxi_gpio_set_pull(pin, pull);
+		}
+	}
+	return 0;
+}
+#endif
+
 static int mvtwsi_i2c_probe(struct udevice *bus)
 {
 	struct mvtwsi_i2c_dev *dev = dev_get_priv(bus);
 	uint actual_speed;
+
+#ifdef CONFIG_SUNXI_GEN_SUN6I
+	mvtwsi_i2c_parse_pins(bus);
+#endif
 
 	__twsi_i2c_init(dev->base, dev->speed, dev->slaveadd, &actual_speed);
 	dev->speed = actual_speed;

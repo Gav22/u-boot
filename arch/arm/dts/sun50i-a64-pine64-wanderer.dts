@@ -53,11 +53,12 @@
 	compatible = "pine64,sopine-baseboard", "pine64,sopine",
 		     "allwinner,sun50i-a64";
 
-	aliases {
+	aliases { /* These will hint at the ordering / bus number assignment in u-boot dm */
 		ethernet0 = &emac;
 		serial0 = &uart0;
 		spi0 = &spi0;
 		spi1 = &spi1;
+		i2c0 = &i2c0;
 	};
 
 	chosen {
@@ -125,9 +126,9 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&i2c0_pins>;
 	status = "okay";
-		eeprom: eeprom@57 {
+	eeprom: eeprom@50 {
 		compatible = "atmel,24c02";
-		reg = <0x57>;
+		reg = <0x50>;
 		pagesize = <8>;
 	};
 	usb2514b@2c {
@@ -136,6 +137,12 @@
 		reset-gpios = <&pio 7 10 GPIO_ACTIVE_LOW>;
 	};
 };
+
+&i2c0_pins {
+	bias-pull-up;
+	drive-strength = <30>;
+};
+
 
 &spi0 {
 	status = "okay";
