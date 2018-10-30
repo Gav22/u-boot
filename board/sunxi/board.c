@@ -15,6 +15,7 @@
 #include <mmc.h>
 #include <spi.h>
 #include <spi_flash.h>
+#include <i2c_eeprom.h>
 #include <axp_pmic.h>
 #include <generic-phy.h>
 #include <phy-sun4i-usb.h>
@@ -38,6 +39,7 @@
 #include <spl.h>
 #include <sy8106a.h>
 #include <asm/setup.h>
+
 
 #if defined CONFIG_VIDEO_LCD_PANEL_I2C && !(defined CONFIG_SPL_BUILD)
 /* So that we can use pin names in Kconfig and sunxi_name_to_gpio() */
@@ -722,6 +724,7 @@ static void parse_spl_header(const uint32_t spl_addr)
 	env_set_hex("fel_scriptaddr", spl->fel_script_address);
 }
 
+#ifdef WAND_MANUF_IN_SPI
 #ifndef CONFIG_ENV_SPI_BUS
 # define CONFIG_ENV_SPI_BUS	CONFIG_SF_DEFAULT_BUS
 #endif
@@ -738,15 +741,24 @@ static void parse_spl_header(const uint32_t spl_addr)
 #define CONFIG_ENV_ROM_OFFSET		0xde000
 #define CONFIG_ENV_ROM_SIZE			0x01000
 #define CONFIG_ENV_ROM_LEN			(CONFIG_ENV_ROM_SIZE - 4)
+#else
+#define CONFIG_ENV_I2C_ADDR			0x50
+#define CONFIG_ENV_ROM_OFFSET		0
+#define CONFIG_ENV_ROM_SIZE			256
+#define CONFIG_ENV_ROM_LEN			(CONFIG_ENV_ROM_SIZE - 4)
+#endif
 
 /*
- * Read manufacturing ROM data from SPI flash
+ * Read manufacturing ROM data from EEPROM / SPI flash
  */
-static int read_spi_rom(void) {
+static int read_mfg_rom(void) {
 	int	ret = 0;
-#ifdef CONFIG_DM_SPI_FLASH
-	struct udevice *new;
+#if (defined(CONFIG_DM_SPI_FLASH) || defined(CONFIG_DM_I2C))
+#ifdef WAND_MANUF_IN_SPI
 	struct spi_flash *env_flash;
+#else
+#endif
+	struct udevice *new;
 	char *buf = NULL;
 
 	buf = (char *)memalign(ARCH_DMA_MINALIGN, CONFIG_ENV_ROM_SIZE);
@@ -754,18 +766,19 @@ static int read_spi_rom(void) {
 		return -EIO;
 	}
 	/* speed and mode will be read from DT */
+#ifdef WAND_MANUF_IN_SPI
 	ret = spi_flash_probe_bus_cs(CONFIG_ENV_SPI_BUS, CONFIG_ENV_SPI_CS,
 				     CONFIG_ENV_SPI_MAX_HZ, CONFIG_ENV_SPI_MODE,
 				     &new);
 	if (ret) {
-		printf("read_spi_rom: can't get SPI bus, ret=%d\n", ret);
+		printf("read_mfg_rom: can't get SPI bus, ret=%d\n", ret);
 		goto out;
 	}
 
 	env_flash = dev_get_uclass_priv(new);
 
 	if (!env_flash) {
-		printf("read_spi_rom: can't get flash device\n");
+		printf("read_mfg_rom: can't get SPI flash device\n");
 		ret = -EIO;
 		goto out;
 	}
@@ -774,7 +787,15 @@ static int read_spi_rom(void) {
 		CONFIG_ENV_ROM_OFFSET, CONFIG_ENV_ROM_SIZE, buf);
 
 	spi_flash_free(env_flash);
+#else
+	ret = uclass_first_device_err(UCLASS_I2C_EEPROM, &new);
+	if (ret) {
+		printf("read_mfg_rom: can't get I2C EEPROM device\n");
+		return ret;
+	}
 
+	ret = i2c_eeprom_read(new, CONFIG_ENV_ROM_OFFSET, (u8*) buf, CONFIG_ENV_ROM_SIZE);
+#endif
 	if (ret == 0) {
 		uint32_t crc;
 		char *bptr = (char *) buf + 4;
@@ -837,7 +858,7 @@ static void setup_environment(const void *fdt)
 	char ethaddr[16];
 	int i, ret;
 
-	read_spi_rom();
+	read_mfg_rom();
 
 	ret = sunxi_get_sid(sid);
 	if (ret == 0 && sid[0] != 0) {
