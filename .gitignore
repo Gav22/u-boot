@@ -89,3 +89,9 @@ GTAGS
 *~
 \#*#
 /Debug/
+
+debian/*.log
+debian/*.substvars
+debian/u-boot-wanderer/
+debian/files
+
