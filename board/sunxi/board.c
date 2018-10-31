@@ -936,6 +936,8 @@ int misc_init_r(void)
 		env_set("mmc_bootdev", "0");
 	} else if (boot == BOOT_DEVICE_MMC2) {
 		env_set("mmc_bootdev", "1");
+	} else if (boot == BOOT_DEVICE_SPI) {
+		env_set("spi_booted", "1");
 	}
 
 	setup_environment(gd->fdt_blob);
@@ -988,6 +990,23 @@ int ft_board_setup(void *blob, bd_t *bd)
 				fdt_setprop_string(blob, r, name, val);
 			}
 		}
+	}
+
+	/* Communicate the chosen boot device */
+	r = fdt_find_or_add_subnode(blob, 0, "chosen");
+	if (r >= 0) {
+		uint32_t boot = sunxi_get_boot_device();
+		const char* bdev = "unknown";
+		if (boot == BOOT_DEVICE_BOARD) {
+			bdev = "fel";
+		} else if (boot == BOOT_DEVICE_MMC1) {
+			bdev = "mmc0";
+		} else if (boot == BOOT_DEVICE_MMC2) {
+			bdev = "mmc2";
+		} else if (boot == BOOT_DEVICE_SPI) {
+			bdev = "spi";
+		}
+		fdt_setprop_string(blob, r, "boot0-device", bdev);
 	}
 
 #ifdef CONFIG_VIDEO_DT_SIMPLEFB
