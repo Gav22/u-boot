@@ -18,6 +18,7 @@
 #include <i2c_eeprom.h>
 #include <axp_pmic.h>
 #include <generic-phy.h>
+#include <miiphy.h>
 #include <phy-sun4i-usb.h>
 #include <asm/arch/clock.h>
 #include <asm/arch/cpu.h>
@@ -829,6 +830,7 @@ static int read_mfg_rom(void) {
 					ENTRY e, *ep;
 					e.key = name;
 					e.data = val;
+					e.flags = 0;
 					hsearch_r(e, ENTER, &ep, &env_htab, H_FORCE);
 				}
 			}
@@ -954,6 +956,39 @@ int ft_board_setup(void *blob, bd_t *bd)
 	 * ethernet aliases the u-boot copy does not have.
 	 */
 	setup_environment(blob);
+
+	/* Is the KSZ present? Tweak the fdt accordingly */
+	if (miiphy_get_dev_by_name("ksz8794_spi")) {
+		int ofs = fdt_node_offset_by_compatible(blob, 0, "fsn,wand2-3-mac");
+		if (ofs > 0) {
+			fdt_status_okay(blob, ofs);
+		}
+	} else {
+		/* No, we revert to stripped down single emac mode */
+		int ofs = fdt_node_offset_by_compatible(blob, 0, "fsn,wand2-1-mac");
+		if (ofs > 0) {
+			fdt_status_okay(blob, ofs);
+		}
+	}
+
+	/* Copy manufacturing info */
+	r = fdt_find_or_add_subnode(blob, 0, "mfginfo");
+	if (r >= 0) {
+		int po;
+		for (po = fdt_first_property_offset(blob, r); po >= 0; po = fdt_next_property_offset(blob, po)) {
+			const char* name;
+			const struct fdt_property *prop;
+			char *val;
+			prop = fdt_get_property_by_offset(blob, po, NULL);
+			name = fdt_string(blob, fdt32_to_cpu(prop->nameoff));
+			//printf("looking for %s\n", name);
+			/* look for the property in the environment */
+			val = env_get(name);
+			if (val) {
+				fdt_setprop_string(blob, r, name, val);
+			}
+		}
+	}
 
 #ifdef CONFIG_VIDEO_DT_SIMPLEFB
 	r = sunxi_simplefb_setup(blob);
