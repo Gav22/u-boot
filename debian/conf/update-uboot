@@ -1,0 +1,80 @@
+#!/bin/sh
+#
+# Update u-boot image on boot device
+#
+# The boot order (hardcoded in A64) is:
+# MMC0 -> MMC2 -> SPI -> FEL
+# 
+# First with valid eGON header wins
+#
+#  update-uboot <mmc0|mmc2|spi>
+#
+# Default if none provided follows above order, first device present is updated
+#
+BDEV=$1
+BIN=/usr/share/u-boot-wanderer/u-boot-wanderer.spl
+
+copy_to_dev() {
+  s=$1
+  dev=""
+  seek=0
+  bs=8k
+  fle=""
+  flp=0
+  case $s in
+    mmc0)
+      dev=/dev/mmcblk0
+      seek=1
+      ;;
+    mmc2)
+      dev=/dev/mmcblk2
+      seek=1
+      ;;
+    spi)
+      # this is normal read-only and will fail
+      dev=/dev/mtd1
+      fle=flash_erase
+      ;;
+    spi_FACTORY_danger)
+      dev=/dev/mtd0
+      # erase 0x00000 to 0xddfff
+      fle=flash_erase
+      flp=222
+      ;;
+    *)
+      echo "Invalid device $dev"
+      exit 2
+      ;;
+  esac
+  if [ ! -w $dev ]; then
+    return 1
+  fi 
+  if [ "$fle" != "" ]; then
+    echo "Erasing flash $dev..."
+    if ! flash_erase $dev 0 $flp > /dev/null; then
+      return 2
+    fi
+  fi
+  echo "Copying to $dev..."
+  if ! dd if=$BIN of=$dev bs=$bs seek=$seek 2> /dev/null; then
+    return 3
+  fi
+  sync
+  echo "Copied u-boot to $dev"
+  return 0
+}
+
+if [ "$BDEV" != "" ]; then
+	if ! copy_to_dev $BDEV; then 
+	  echo "Unable to write to device"
+	  exit 1
+	fi
+else
+  for s in mmc0 mmc2 spi; do
+    if copy_to_dev $s; then
+    	exit 0
+    fi
+  done
+  echo "No writable device found"
+  exit 1
+fi
