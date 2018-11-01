@@ -64,6 +64,14 @@ copy_to_dev() {
   return 0
 }
 
+devfs=$(findmnt -n -o FSTYPE /dev 2> /dev/null || true)
+
+if [ "$devfs" != "devtmpfs" ]; then
+  # We are not looking at a real /dev, exit cleanly
+  echo "Not updating u-boot binary, no dev filesystem present"
+  exit 0
+fi
+
 if [ "$BDEV" != "" ]; then
 	if ! copy_to_dev $BDEV; then 
 	  echo "Unable to write to device"

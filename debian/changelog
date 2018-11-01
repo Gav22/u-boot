@@ -1,6 +1,7 @@
 u-boot-wanderer (1.6) xenial; urgency=medium
 
   * Add postinst script to copy to boot device
+  * Bump, after fixup
 
  -- Michael Walton <mwalton@fsn-mike.intranet.farsouthnet.com>  Thu, 01 Nov 2018 13:22:27 +1300
 
