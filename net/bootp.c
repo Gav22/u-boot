@@ -704,6 +704,8 @@ void bootp_reset(void)
 	bootp_try = 0;
 	bootp_start = get_timer(0);
 	bootp_timeout = 250;
+	env_set("pxeoffer", "0");
+
 }
 
 void bootp_request(void)
@@ -891,6 +893,11 @@ static void dhcp_process_options(uchar *popt, uchar *end)
 		case 58:	/* Ignore Renewal Time Option */
 			break;
 		case 59:	/* Ignore Rebinding Time Option */
+			break;
+		case 60:    /* Class identifier for PXE, looking for PXEClient */
+			if (oplen >= 9 && strncmp(popt+2, "PXEClient", 9) == 0) {
+				env_set("pxeoffer", "1");
+			}
 			break;
 		case 66:	/* Ignore TFTP server name */
 			break;
