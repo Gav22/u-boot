@@ -1,6 +1,7 @@
 u-boot-wanderer (1.7) xenial; urgency=medium
 
   * Improve PXE boot process
+  * Bump
 
  -- Michael Walton <mwalton@fsn-mike.intranet.farsouthnet.com>  Mon, 05 Nov 2018 12:15:19 +1300
 

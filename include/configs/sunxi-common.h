@@ -425,7 +425,7 @@ extern int soft_i2c_gpio_scl;
 #define BOOTENV_DEV_PXE2(devtypeu, devtypel, instance) \
 	"pxedhcp_cmd=setenv autoload 0; dhcp; test \"${pxeoffer}\" = \"1\"\0" \
 	"bootcmd_pxe=" \
-		"if run pxedhcp_cmd; then" \
+		"if run pxedhcp_cmd; then " \
 		"if pxe get; then " \
 			"pxe boot; " \
 		"fi; fi\0"
