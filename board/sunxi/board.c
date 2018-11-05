@@ -262,6 +262,10 @@ int board_init(void)
 		gpio_request(pl2, "wifi_en");
 		gpio_request(pl3, "wifi_wake"); // Enable PSU when low
 		gpio_request(pl4, "wifi_rst");
+		gpio_request(ph11, "irq_rst");
+		gpio_request(ph10, "usb_rst");
+		gpio_request(ph5, "usb_pwr1");
+		gpio_request(ph6, "usb_pwr2");
 		//gpio_direction_output(pl3, 0);
 		//mdelay(5);
 		gpio_direction_output(ph9, 1);
