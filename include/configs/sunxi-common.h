@@ -537,6 +537,7 @@ extern int soft_i2c_gpio_scl;
 	BOOTCMD_SUNXI_COMPAT \
 	"pxeuuid=" UUID_PXE_WANDERER "\0" \
 	"bootp_vci=PXEClient:Arch:00011:UNDI:001001\0" \
+	"bootpretryperiod=6000\0" \
 	BOOTENV
 
 #else /* ifndef CONFIG_SPL_BUILD */
