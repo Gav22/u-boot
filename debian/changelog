@@ -1,3 +1,9 @@
+u-boot-wanderer (1.9) xenial; urgency=medium
+
+  * Fix for #1884 - MAC address in device tree for selected Ethernet configuration
+
+ -- Michael Walton <mwalton@fsn-mike.intranet.farsouthnet.com>  Wed, 07 Nov 2018 12:10:21 +1300
+
 u-boot-wanderer (1.8) xenial; urgency=medium
 
   * Reserve GPIOs on boot

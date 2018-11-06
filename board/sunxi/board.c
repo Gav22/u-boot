@@ -953,9 +953,33 @@ int misc_init_r(void)
 	return 0;
 }
 
+static void sunxi_enable_ft_option(void *blob, int ofs) {
+	char *tmp;
+
+	/* Set the chosen ethernet configuration to "okay" */
+	fdt_status_okay(blob, ofs);
+	/* We also need to set up the first local-mac-address for this one, see ticket #1884,
+	 * reason being that the ethernet0 alias may not point to the chosen one */
+	tmp = env_get("ethaddr");
+	if (tmp) {
+		u8 mac_addr[6];
+		int j;
+		char *end;
+		for (j = 0; j < 6; j++) {
+			mac_addr[j] = tmp ?
+				      simple_strtoul(tmp, &end, 16) : 0;
+			if (tmp)
+				tmp = (*end) ? end + 1 : end;
+		}
+		fdt_setprop(blob, ofs, "local-mac-address", &mac_addr, 6);
+	}
+
+}
+
 int ft_board_setup(void *blob, bd_t *bd)
 {
 	int __maybe_unused r;
+	int ofs = 0;
 
 	/*
 	 * Call setup_environment again in case the boot fdt has
@@ -965,16 +989,15 @@ int ft_board_setup(void *blob, bd_t *bd)
 
 	/* Is the KSZ present? Tweak the fdt accordingly */
 	if (miiphy_get_dev_by_name("ksz8794_spi")) {
-		int ofs = fdt_node_offset_by_compatible(blob, 0, "fsn,wand2-3-mac");
-		if (ofs > 0) {
-			fdt_status_okay(blob, ofs);
-		}
+		ofs = fdt_node_offset_by_compatible(blob, 0, "fsn,wand2-3-mac");
 	} else {
 		/* No, we revert to stripped down single emac mode */
-		int ofs = fdt_node_offset_by_compatible(blob, 0, "fsn,wand2-1-mac");
-		if (ofs > 0) {
-			fdt_status_okay(blob, ofs);
-		}
+		ofs = fdt_node_offset_by_compatible(blob, 0, "fsn,wand2-1-mac");
+	}
+	if (ofs > 0) {
+		sunxi_enable_ft_option(blob, ofs);
+	} else {
+		printf("Error: unable to find compatible ethernet configuration in FDT\n");
 	}
 
 	/* Copy manufacturing info */
