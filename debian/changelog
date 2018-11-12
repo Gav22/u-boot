@@ -1,6 +1,13 @@
+u-boot-wanderer (1.10) xenial; urgency=medium
+
+  * Don't expect option 60 on PXE offer, rather look for bootfile
+
+ -- Michael Walton <mwalton@fsn-mike.intranet.farsouthnet.com>  Tue, 13 Nov 2018 09:04:00 +1300
+
 u-boot-wanderer (1.9) xenial; urgency=medium
 
-  * Fix for #1884 - MAC address in device tree for selected Ethernet configuration
+  * Fix for #1884 - MAC address in device tree for selected 
+    Ethernet configuration
 
  -- Michael Walton <mwalton@fsn-mike.intranet.farsouthnet.com>  Wed, 07 Nov 2018 12:10:21 +1300
 
