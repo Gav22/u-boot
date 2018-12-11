@@ -1,0 +1,26 @@
+#!/bin/sh
+#
+# Set next device to boot (only one time). After this is attempted, next
+# boot will be back to usual priority:
+# 
+# fel, pxe, usb, mmc1, mmc0
+#
+# The stage 1 boot order (hardcoded in A64) is:
+# MMC0 -> MMC2(1) -> SPI -> FEL
+#
+# But any u-boot that we build will source its environment from SPI, so
+# we can always update it there 
+#
+# bootnext <mmc0|mmc1|pxe|usb> 
+#
+BN=$1
+SETENV=/usr/share/u-boot-wanderer/fw_setenv
+
+set -e
+
+# Standardised boot command for next selected device
+BOOTCMD_NEXT='if test -e ${boot_next}; then echo "Trying to boot next: ${boot_next}"; bn=${boot_next}; setenv boot_next; saveenv; run bootcmd_${bn}; fi'
+
+$SETENV bootcmd_next "${BOOTCMD_NEXT}"
+$SETENV boot_targets "next fel pxe usb0 mmc_auto"
+$SETENV boot_next $BN
