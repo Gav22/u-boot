@@ -1,3 +1,9 @@
+u-boot-wanderer (1.13) xenial; urgency=medium
+
+  * Fix bootnext default order to make sure mmc1 is preferred over mmc0
+
+ -- Michael Walton <mwalton@fsn-mike.intranet.farsouthnet.com>  Wed, 12 Dec 2018 10:08:39 +1300
+
 u-boot-wanderer (1.12) xenial; urgency=medium
 
   * Oops, forgot to install the file

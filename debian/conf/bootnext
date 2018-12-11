@@ -22,5 +22,5 @@ set -e
 BOOTCMD_NEXT='if test -e ${boot_next}; then echo "Trying to boot next: ${boot_next}"; bn=${boot_next}; setenv boot_next; saveenv; run bootcmd_${bn}; fi'
 
 $SETENV bootcmd_next "${BOOTCMD_NEXT}"
-$SETENV boot_targets "next fel pxe usb0 mmc_auto"
+$SETENV boot_targets "next fel pxe usb0 mmc1 mmc0"
 $SETENV boot_next $BN
