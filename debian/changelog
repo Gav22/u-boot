@@ -1,3 +1,9 @@
+u-boot-wanderer (1.14) xenial; urgency=medium
+
+  * Use /dev/mmcblk1 instead of /dev/mmcblk2
+
+ -- Michael Walton <mwalton@fsn-mike.intranet.farsouthnet.com>  Tue, 29 Jan 2019 11:32:07 +1300
+
 u-boot-wanderer (1.13) xenial; urgency=medium
 
   * Fix bootnext default order to make sure mmc1 is preferred over mmc0

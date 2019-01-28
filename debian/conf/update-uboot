@@ -27,7 +27,7 @@ copy_to_dev() {
       seek=1
       ;;
     mmc2)
-      dev=/dev/mmcblk2
+      dev=/dev/mmcblk1
       seek=1
       ;;
     spi)
