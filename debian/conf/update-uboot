@@ -13,6 +13,7 @@
 #
 BDEV=$1
 BIN=/usr/share/u-boot-wanderer/u-boot-wanderer.spl
+SETENV=/usr/share/u-boot-wanderer/fw_setenv
 
 copy_to_dev() {
   s=$1
@@ -61,6 +62,8 @@ copy_to_dev() {
   fi
   sync
   echo "Copied u-boot to $dev"
+  # Re ticket #2014 - make sure boot order is correct
+  $SETENV boot_targets "next fel pxe usb0 mmc1 mmc0"
   return 0
 }
 
