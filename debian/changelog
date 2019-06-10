@@ -1,3 +1,9 @@
+u-boot-wanderer (1.16) xenial; urgency=medium
+
+  * Support bionic build
+
+ -- comma <comma@George.intra.farsouthnet.com>  Mon, 10 Jun 2019 04:38:23 +0200
+
 u-boot-wanderer (1.15) xenial; urgency=medium
 
   * Fix for #2014 - incorrect boot order with dual SD card
