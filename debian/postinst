@@ -1,5 +1,5 @@
 #!/bin/sh
-# postinst script for u-boot-wanderer
+# postinst script for u-boot-pinea64
 #
 # see: dh_installdeb(1)
 
@@ -27,7 +27,7 @@ case "$1" in
     configure|reconfigure)
     	# copy u-boot to boot device
     	echo "Updating u-boot to default boot device..."
-    	/usr/share/u-boot-wanderer/update-uboot
+    	/usr/share/u-boot-pinea64/update-uboot
 	;;
 
     abort-upgrade|abort-remove|abort-deconfigure)

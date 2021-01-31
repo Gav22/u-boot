@@ -1,6 +1,6 @@
-u-boot-wanderer.spl usr/share/u-boot-wanderer/
-tools/env/fw_printenv usr/share/u-boot-wanderer/
+u-boot-pinea64.spl usr/share/u-boot-pinea64/
+tools/env/fw_printenv usr/share/u-boot-pinea64/
 debian/conf/fw_env.config /etc/
-debian/conf/update-uboot usr/share/u-boot-wanderer/
-debian/conf/bootnext usr/share/u-boot-wanderer/
+debian/conf/update-uboot usr/share/u-boot-pinea64/
+debian/conf/bootnext usr/share/u-boot-pinea64/
 

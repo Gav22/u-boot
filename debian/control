@@ -1,14 +1,14 @@
-Source: u-boot-wanderer
+Source: u-boot-pinea64
 Section: misc
 Priority: extra
-Maintainer: Michael Walton <mike@farsouthnet.com>
+Maintainer: Gavin Delcie <gavin@farsouthnet.com>
 Build-Depends: debhelper (>= 9), arm-trusted-firmware (>= 1.0), device-tree-compiler, bison, flex, python:native, python-dev:native, swig
 Standards-Version: 3.9.4
 
-Package: u-boot-wanderer
+Package: u-boot-pinea64
 Architecture: any
 Depends: 
-Description: Boot image for Wanderer 2
- Boot image for Wanderer 2 (Allwinner A64), based on u-boot 
+Description: Boot image for pinea64 2
+ Boot image for pinea64 2 (Allwinner A64), based on u-boot 
  with SPL and ARM trusted firmware.
 

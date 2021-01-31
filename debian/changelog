@@ -1,3 +1,9 @@
+u-boot-pinea64 (1.17) buster; urgency=medium
+
+  * Build for pine A64 lts
+
+ -- Gavin Delcie <gavin@farsouthnet.com>  Fri, 29 Jan 2021 16:56:23 +0200
+
 u-boot-wanderer (1.16) xenial; urgency=medium
 
   * Support bionic build

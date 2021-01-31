@@ -92,6 +92,6 @@ GTAGS
 
 debian/*.log
 debian/*.substvars
-debian/u-boot-wanderer/
+debian/u-boot-pinea64/
 debian/files
 

@@ -15,7 +15,7 @@ export DEB_CFLAGS_MAINT_SET=
 export DEB_LDFLAGS_MAINT_SET=
 
 ATF_BIN=/usr/share/arm-trusted-firmware/bl31.bin
-UBOOT_BIN=u-boot-wanderer.spl
+UBOOT_BIN=u-boot-pinea64.spl
 ENV_BIN=tools/env/fw_printenv
 
 $(UBOOT_BIN):
