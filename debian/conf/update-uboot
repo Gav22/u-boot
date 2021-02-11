@@ -12,8 +12,8 @@
 # Default if none provided follows above order, first device present is updated
 #
 BDEV=$1
-BIN=/usr/share/u-boot-wanderer/u-boot-wanderer.spl
-SETENV=/usr/share/u-boot-wanderer/fw_setenv
+BIN=/usr/share/u-boot-pinea64/u-boot-pinea64.spl
+SETENV=/usr/share/u-boot-pinea64/fw_setenv
 
 copy_to_dev() {
   s=$1

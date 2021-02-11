@@ -14,7 +14,7 @@
 # bootnext <mmc0|mmc1|pxe|usb> 
 #
 BN=$1
-SETENV=/usr/share/u-boot-wanderer/fw_setenv
+SETENV=/usr/share/u-boot-pinea64/fw_setenv
 
 set -e
 
