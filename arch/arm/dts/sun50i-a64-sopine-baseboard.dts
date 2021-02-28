@@ -55,6 +55,9 @@
 	aliases {
 		ethernet0 = &emac;
 		serial0 = &uart0;
+		spi0 = &spi0;
+		spi1 = &spi1;
+		i2c0 = &i2c0;
 	};
 
 	chosen {
@@ -91,6 +94,20 @@
 		compatible = "ethernet-phy-ieee802.3-c22";
 		reg = <1>;
 	};
+};
+
+&i2c0_pins {
+	bias-pull-up;
+	drive-strength = <30>;
+};
+
+
+&spi0 {
+	status = "okay";
+};
+
+&spi1 {
+	status = "okay";
 };
 
 &mmc2 {

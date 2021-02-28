@@ -1,3 +1,9 @@
+u-boot-pinea64 (1.18) buster; urgency=medium
+
+  * Add support for adesto and winbond spi flash devices
+
+ -- Gavin Delcie <gavin@farsouthnet.com>  Tue, 23 Feb 2021 17:13:23 +0200
+ 
 u-boot-pinea64 (1.17) buster; urgency=medium
 
   * Build for pine A64 lts
